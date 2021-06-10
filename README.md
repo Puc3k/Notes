@@ -1,5 +1,5 @@
 /* W trakcie tworzenia! */
-##NOTES
+## NOTES ##
 - Aplikacja stworzona do zarządzania notatkami,
 - zbudowana na wzrocu projektowym MVC,
 - własna obsługa błędów,
