@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Request;
 use App\Exceptions\AppExceptions;
 use App\Exceptions\ConfigurationException;
 use Throwable;
 
 require_once("src/Utils/debug.php");
 require_once("src/Controller.php");
+require_once("src/Request.php");
+require_once("src/Exceptions/AppException.php");
 
 $configuration = require_once("src/config/config.php");
-$request = [
-    'get' => $_GET,
-    'post' => $_POST
-];
+$request = new Request($_GET, $_POST);
 try {
     //$controller = new Controller($request);
     //$controller->run();

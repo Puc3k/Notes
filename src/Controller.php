@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Request;
 use App\Exceptions\ConfigurationException;
 use App\Exceptions\NotFounException;
 use Throwable;
@@ -23,7 +24,7 @@ class Controller
     {
         self::$configuration = $configuration;
     }
-    public function __construct(array $request)
+    public function __construct(Request $request)
     {
         if (!empty($configuration['db'])) {
             throw new ConfigurationException('Configuration error');
@@ -34,18 +35,16 @@ class Controller
     }
     public function run(): void
     {
-        $data = $this->getRequestPost();
         switch ($this->action()) {
             case 'create':
                 $page = 'create';
-                if (!empty($data)) {
+                if ($this->request->hasPost()) {
                     $noteData = [
-                        'title' => $data['title'],
-                        'description' => $data['description']
+                        'title' => $this->request->postParam('title'),
+                        'description' =>  $this->request->postParam('description')
 
                     ];
                     $this->database->createNote($noteData);
-                    dump($data);
                     header('Location: /Notes/?before=created');
                 }
 
@@ -54,8 +53,9 @@ class Controller
 
             case 'show':
                 $page = 'show';
-                $data = $this->getRequestGet();
-                $noteId = (int)($data['id'] ?? null);
+                //$data = $this->getRequestGet();
+               // $noteId = (int)($data['id'] ?? null);
+                $noteId = (int)$this->request->getParam('id');
                 if(!$noteId){
                     header('Location: /Notes/?error=missingNoteId');
                     exit;
@@ -76,11 +76,10 @@ class Controller
 
             default:
                 $page = 'list';
-                $data = $this->getRequestGet();
                 $viewParams = [
                     'notes' => $this->database->getNotes(),
-                    'before' => $data['before'] ?? null,
-                    'error' => $data['error'] ?? null
+                    'before' => $this->request->getParam('before'),
+                    'error' => $this->request->getParam('error')
                 ];
                 break;
         }
@@ -88,15 +87,6 @@ class Controller
     }
     private function action(): string
     {
-        $data = $this->getRequestGet();
-        return ($data['action']) ?? self::DEFAULT_ACTION;
-    }
-    private function getRequestPost(): array
-    {
-        return $this->request['post'] ?? [];
-    }
-    private function getRequestGet(): array
-    {
-        return $this->request['get'] ?? [];
+        return $this->request->getParam('action',self::DEFAULT_ACTION);
     }
 }
