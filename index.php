@@ -2,31 +2,32 @@
 
 declare(strict_types=1);
 
-namespace App;
+spl_autoload_register(function (string $name) {
+    $name = str_replace(['\\', 'App/'], ['/', ''], $name);
+    $path = "src/$name.php";
+    require_once($path);
+});
 
+require_once("src/Utils/debug.php");
+$configuration = require_once("src/config/config.php");
+
+use App\Controller\AbstractController;
+use App\Controller\NoteController;
 use App\Request;
 use App\Exceptions\AppExceptions;
 use App\Exceptions\ConfigurationException;
-use Throwable;
 
-require_once("src/Utils/debug.php");
-require_once("src/Controller.php");
-require_once("src/Request.php");
-require_once("src/Exceptions/AppException.php");
-
-$configuration = require_once("src/config/config.php");
-$request = new Request($_GET, $_POST);
+$request = new Request($_GET, $_POST, $_SERVER);
 try {
     //$controller = new Controller($request);
     //$controller->run();
-    Controller::initConfiguration($configuration);
-    (new Controller($request))->run();
-}
-catch (ConfigurationException $e) {
+    AbstractController::initConfiguration($configuration);
+    (new NoteController($request))->run();
+} catch (ConfigurationException $e) {
     echo '<h1> Proszę skontatktować się z administratorem xxx@xx.x </h1>';
-}
-catch (AppExceptions $e) {
+} catch (AppExceptions $e) {
     echo '<h3>' . $e->getMessage() . '</h3>';
-} catch (Throwable $e) {
+} catch (\Throwable $e) {
     echo '<h1> Wystąpił błąd aplikacji </h1>';
+    dump($e);
 }
