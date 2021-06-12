@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace App;
 
 use App\Exceptions\ConfigurationException;
-use App\Exceptions\NotFounException;
+use App\Exceptions\NotFoundException;
 use App\Exceptions\StorageException;
 use Throwable;
 use PDO;
 use PDOException;
-
-require_once("Exceptions/StorageException.php");
-require_once("Exceptions/NotFoundException.php");
 
 class Database
 {
@@ -32,12 +29,11 @@ class Database
             $query = "SELECT * FROM notes WHERE id=$id";
             $result = $this->conn->query($query);
             $note = $result->fetch(PDO::FETCH_ASSOC);
-           
         } catch (Throwable $e) {
             throw new StorageException('Nie udało się pobrać notatki :(');
         }
-        if(!$note){
-            throw new NotFounException('Nie ma takiej notatki :/');
+        if (!$note) {
+            throw new NotFoundException('Nie ma takiej notatki :/');
         }
         return $note;
     }
@@ -49,6 +45,22 @@ class Database
             return $notes = $result->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $e) {
             throw new StorageException('Nie udało pobrać się danych o notatkach');
+        }
+    }
+    public function editNote(int $id, array $data): void
+    {
+        try {
+            $title = $this->conn->quote($data['title']);
+            $description = $this->conn->quote($data['description']);
+
+            $query = "
+            UPDATE notes
+            SET title=$title, description=$description
+            WHERE id=$id
+            ";
+            $this->conn->exec($query);
+        } catch (Throwable $e) {
+            throw new StorageException('Nie udało się zaktualizować notatki :(', 400, $e);
         }
     }
     public function createNote(array $data): void

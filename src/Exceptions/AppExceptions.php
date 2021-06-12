@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-class StorageException extends AppExceptions
+use Exception;
+
+class AppExceptions extends Exception
 {
 }
