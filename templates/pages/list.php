@@ -24,6 +24,9 @@
           case 'edited':
             echo 'Notatka została zaktualizowana!';
             break;
+          case 'deleted':
+            echo 'Notatka została pomyślnie usunięta!';
+            break;
         }
       }
       ?>
@@ -51,6 +54,9 @@
               <td>
                 <a href="/Notes/?action=show&id=<?php echo (int)$note['id']; ?>">
                   <button>Szczegóły</button>
+                </a>
+                <a href="/Notes/?action=delete&id=<?php echo (int)$note['id']; ?>">
+                  <button>Usuń</button>
                 </a>
               </td>
             </tr>
