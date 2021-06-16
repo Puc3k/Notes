@@ -33,35 +33,51 @@
 
     </div>
 
-      <?php
-      $sort = $params['sort'] ?? [];
-      $by = $sort['by'] ?? 'title';
-      $order = $sort['order'] ?? 'desc';
+    <?php
+    $sort = $params['sort'] ?? [];
+    $by = $sort['by'] ?? 'title';
+    $order = $sort['order'] ?? 'desc';
 
-?>
+    $page = $params['page'] ?? [];
+    $size = $page['size'] ?? 10;
+    $currentPage = $page['number'] ?? 1;
+    $pages = $page['pages'] ?? 1;
+
+    $phrase= $params['phrase'] ?? null;
+    ?>
 
     <div>
       <form class="settings-form" action="/Notes" method="GET">
-      <div>
-        <div>Sortuj po:</div>
+        <div>
+          <label>Wyszukaj:<input type="text" name="phrase" value="<?php echo $phrase; ?>"/></label>
+        </div>
+        <div>
+          <div>Sortuj po:</div>
           <label>Tytule:
-            <input name="sortby" type="radio" value="title" <?php echo $by==='title' ? 'checked' :  ''; ?> />
+            <input name="sortby" type="radio" value="title" <?php echo $by === 'title' ? 'checked' :  ''; ?> />
           </label>
           <label>Dacie:
-            <input name="sortby" type="radio" value="created" <?php echo $by==='created' ? 'checked' :  ''; ?>/>
+            <input name="sortby" type="radio" value="created" <?php echo $by === 'created' ? 'checked' :  ''; ?> />
           </label>
         </div>
         <div>
-        <div>Kierunek sortowania:</div>
-        <div>
-        <label>Rosnąco:
-            <input name="sortorder" type="radio" value="asc"  <?php echo $order==='asc' ? 'checked' :  ''; ?>/>
-          </label>
-          <label>Malejąco:
-            <input name="sortorder" type="radio" value="desc"  <?php echo $order==='desc' ? 'checked' :  ''; ?>/>
-          </label>
-         </div>
-         <input type="submit" value="Wyślij" />
+          <div>Kierunek sortowania:</div>
+          <div>
+            <label>Rosnąco:
+              <input name="sortorder" type="radio" value="asc" <?php echo $order === 'asc' ? 'checked' :  ''; ?> />
+            </label>
+            <label>Malejąco:
+              <input name="sortorder" type="radio" value="desc" <?php echo $order === 'desc' ? 'checked' :  ''; ?> />
+            </label>
+          </div>
+          <div><br />
+            <div>Notatek na stronie: </div>
+            <label>1<input name="pagesize" type="radio" value="1" <?php echo $size === 1 ? 'checked' : '' ?> /></label>
+            <label>5<input name="pagesize" type="radio" value="5" <?php echo $size === 5 ? 'checked' : '' ?> /></label>
+            <label>10<input name="pagesize" type="radio" value="10" <?php echo $size === 10 ? 'checked' : '' ?> /></label>
+            <label>25<input name="pagesize" type="radio" value="25" <?php echo $size === 25 ? 'checked' : '' ?> /></label>
+          </div>
+          <input type="submit" value="Wyślij" />
       </form>
     </div>
     <div class="tbl-header">
@@ -99,5 +115,34 @@
       </table>
 
     </div>
+    <?php
+    $paginationUrl = "&phrase=$phrase&pagesize=$size?sortby=$by&sortorder=$order";
+    ?>
+    <ul class="pagination">
+      <?php if ($currentPage !== 1) : ?>
+        <li>
+          <a href="/Notes/?page=<?php echo $currentPage - 1 . $paginationUrl; ?>">
+            <button>
+              << </button>
+          </a>
+        </li>
+      <?php endif; ?>
+      <?php for ($i = 1; $i <= $pages; $i++) : ?>
+        <li>
+          <a href="/Notes/?page=<?php echo $i . $paginationUrl; ?>">
+            <button>
+              <?php echo $i ?>
+            </button>
+          </a>
+        </li>
+      <?php endfor; ?>
+      <?php if ($currentPage < $pages) : ?>
+        <li>
+          <a href="/Notes/?page=<?php echo $currentPage + 1 . $paginationUrl; ?>">
+            <button> >> </button>
+          </a>
+        </li>
+      <?php endif; ?>
+    </ul>
   </section>
 </div>

@@ -24,10 +24,9 @@ try {
     AbstractController::initConfiguration($configuration);
     (new NoteController($request))->run();
 } catch (ConfigurationException $e) {
-    echo '<h1> Proszę skontatktować się z administratorem xxx@xx.x </h1>';
+    echo '<h1> Proszę skontatktować się z administratorem xxx@xx.xx </h1>';
 } catch (AppExceptions $e) {
     echo '<h3>' . $e->getMessage() . '</h3>';
 } catch (\Throwable $e) {
     echo '<h1> Wystąpił błąd aplikacji </h1>';
-    dump($e);
 }

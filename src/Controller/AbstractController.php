@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Database;
+use App\Model\NoteModel;
 use App\Request;
 use App\Exceptions\ConfigurationException;
+use App\Exceptions\NotFoundException;
+use App\Exceptions\StorageException;
 use App\View;
 
 abstract class AbstractController
@@ -14,7 +16,7 @@ abstract class AbstractController
     protected const DEFAULT_ACTION = 'list';
 
     protected  $request;
-    protected  $database;
+    protected  $noteModel;
     protected  $view;
 
     private static $configuration = [];
@@ -29,20 +31,31 @@ abstract class AbstractController
         if (!empty($configuration['db'])) {
             throw new ConfigurationException('Configuration error');
         }
-        $this->database = new Database(self::$configuration['db']);
-        $view = $this->view = new View();
+        $this->noteModel = new NoteModel(self::$configuration['db']);
+        $this->view = new View();
         $this->request = $request;
     }
+
     public function run(): void
     {
-        $action = $this->action() . 'Action';
-        if (!method_exists($this, $action)) {
-            $action = self::DEFAULT_ACTION . 'Action';
-        } else {
+        try {
+            $action = $this->action() . 'Action';
+            if (!method_exists($this, $action)) {
+                $action = self::DEFAULT_ACTION . 'Action';
+            }
             $this->$action();
+        } catch (StorageException $e) {
+            $this->view->render(
+                'error',
+                ['message' => $e->getMessage()]
+
+            );
+        } catch (NotFoundException $e) {
+            $this->redirect('/', ['error' => 'noteNotFound']);
         }
     }
-    protected function redirect(string $to, array $params): void
+
+    final protected function redirect(string $to, array $params): void
     {
         $location = $to;
         if (count($params)) {
@@ -59,6 +72,7 @@ abstract class AbstractController
         header("Location: /Notes$location");
         exit;
     }
+
     private function action(): string
     {
         return $this->request->getParam('action', self::DEFAULT_ACTION);
